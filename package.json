@@ -1,0 +1,24 @@
+{
+  "name": "rag_project01",
+  "version": "1.0.0",
+  "description": "A Project to build the base of RAG implementation in web dev projects.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "RAG",
+    "GenAI"
+  ],
+  "author": "Aftab",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.94.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1"
+  }
+}
