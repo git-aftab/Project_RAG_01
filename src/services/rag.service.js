@@ -111,7 +111,70 @@ class RAGServices {
     Instruction: Answer the question based solely on the context provide above. If the Context doesn't contain enough information to answer the question, say so. Be Concise and accurate.`;
   }
 
-  async getAllDocs() {}
-  async deleteDocument(documentId) {}
-  async getDocs(documentId) {}
+  async getAllDocs() {
+    try {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("id, title, created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      throw new Error("Failed to fetch documents");
+    }
+  }
+  async deleteDocument(documentId) {
+    try {
+      // chunk will be automatically deleted due to cascade
+      const { error } = await supabase
+        .from("documents")
+        .delete()
+        .eq("id", documentId);
+
+      if (error) throw error;
+
+      console.log("Deleted docs");
+
+      return true;
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      throw new Error("Failed to delete document");
+    }
+  }
+  async getDocs(documentId) {
+    try {
+      const {
+        data: doucment,
+        error,
+        docError,
+      } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("id", documentId)
+        .single();
+
+      if (docError) throw docError;
+
+      const { data: chunks, error: chunksError } = await supabase
+        .from("document_chunks")
+        .select("id,content, chunk_index")
+        .eq("document_id", documentId)
+        .order("chunk_index", { ascending: true });
+
+      if (chunksError) throw chunksError;
+
+      return {
+        ...document,
+        chunks,
+      };
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      throw new Error("Failed to fetch document");
+    }
+  }
 }
+
+export default new RAGServices();
