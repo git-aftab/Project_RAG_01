@@ -1,6 +1,6 @@
-import { supabase } from "../config/supabase";
-import chunkingService from "./chunking.service";
-import embeddingService from "./embedding.service";
+import { supabase } from "../config/supabase.js";
+import chunkingService from "./chunking.service.js";
+import embeddingService from "./embedding.service.js";
 
 class RAGServices {
   async uploadDocument(title, content) {
@@ -18,7 +18,15 @@ class RAGServices {
       console.log(`created ${chunks.length} chunks for doucment: ${title}`);
 
       // Generate embeddings for all chunks
-      const embeddings = await embeddingService.generateEmbedding(chunks);
+      const embeddings =
+        await embeddingService.generateEmbeddingsForMultiText(chunks);
+
+      // 🔍 DEBUG: Check embedding format
+      console.log("Number of embeddings:", embeddings.length);
+      console.log("First embedding type:", typeof embeddings[0]);
+      console.log("First embedding is array?", Array.isArray(embeddings[0]));
+      console.log("First embedding length:", embeddings[0]?.length);
+      console.log("First 5 values:", embeddings[0]?.slice(0, 5));
 
       // const prepare chunk records for alll chunks
       const chunkRecords = chunks.map((chunk, index) => ({
@@ -28,8 +36,20 @@ class RAGServices {
         chunk_index: index,
       }));
 
+      console.log("\n=== DEBUG CHUNK RECORDS ===");
+      console.log("Number of chunk records:", chunkRecords.length);
+      chunkRecords.forEach((record, i) => {
+        console.log(`\nChunk ${i}:`);
+        console.log("  document_id:", record.document_id);
+        console.log("  content length:", record.content.length);
+        console.log("  embedding is array?", Array.isArray(record.embedding));
+        console.log("  embedding length:", record.embedding?.length);
+        console.log("  embedding sample:", record.embedding?.slice(0, 3));
+      });
+      console.log("===========================\n");
+
       const { error: chunksError } = await supabase
-        .from("doucument_chunks")
+        .from("document_chunks")
         .insert(chunkRecords);
 
       if (chunksError) throw chunksError;
@@ -44,11 +64,26 @@ class RAGServices {
     }
   }
 
-  async query(question, topK = 5, similarityThreshold = 0.5) {
+  async query(question, topK = 5, similarityThreshold = 0.3) {
     try {
       // generate embedding for the question
       const questionEmbedding =
         await embeddingService.generateEmbedding(question);
+
+      console.log("Question embedding length:", questionEmbedding.length);
+      console.log(
+        "Question embedding is array?",
+        Array.isArray(questionEmbedding),
+      );
+
+      // Check whats in database
+      const { data: allChunks } = await supabase
+        .from("document_chunks")
+        .select("id,content")
+        .limit(5);
+
+      console.log("\nChunks in dB:", allChunks?.length);
+      console.log("Sample Chunk:", allChunks?.[0]?.content?.substring(0, 50));
 
       // search for similar chunks chunks using the db func()
       const { data: matches, error: searchError } = await supabase.rpc(
@@ -59,6 +94,10 @@ class RAGServices {
           match_count: topK,
         },
       );
+
+      console.log("\nSearch error:", searchError);
+      console.log("Matches found:", matches?.length);
+      console.log("Raw matches:", JSON.stringify(matches, null, 2));
 
       if (searchError) throw searchError;
 
@@ -78,26 +117,63 @@ class RAGServices {
       // create prompt
       const prompt = this.buildPrompt(context, question);
 
-      // generate answer using llm
-      const answer = await embeddingService.generateCompletion([
+      const messages = [
         {
           role: "system",
           content:
-            "You are a helpful assistant that answers questions based on the provided context from the user's personal documents.",
+            "You are a helpful assistant that answers questions based on the provided context.",
         },
         { role: "user", content: prompt },
+      ];
+
+      console.log("\n=== Messages Being Sent ===");
+      console.log(JSON.stringify(messages, null, 2));
+      console.log("===========================\n");
+
+      // const answer = await embeddingService.generateCompletion(messages);
+
+      const answer = await embeddingService.generateCompletion([
+        {
+          role: "user",
+          content: `You are a helpful assistant. Answer based ONLY on this context:
+
+${context}
+
+Question: ${question}
+
+Answer concisely:`,
+        },
       ]);
 
-      const sources = matches.map((match) => ({
-        documentId: match.document_id,
-        content: match.content,
-        similarity: match.similarity,
-      }));
+      // generate answer using llm
+      // const answer = await embeddingService.generateCompletion([
+      //   {
+      //     role: "system",
+      //     content:
+      //       "You are a helpful assistant that answers questions based on the provided context from the user's personal documents.",
+      //   },
+      //   { role: "user", content: prompt },
+      // ]);
+
+      // const sources = matches.map((match) => ({
+      //   documentId: match.document_id,
+      //   content: match.content,
+      //   similarity: match.similarity,
+      // }));
 
       return {
         answer,
-        sources,
+        sources: matches.map((match) => ({
+          documentId: match.document_id,
+          content: match.content,
+          similarity: match.similarity,
+        })),
       };
+
+      // return {
+      //   answer,
+      //   sources,
+      // };
     } catch (error) {
       console.error("Error querying documents:", error);
       throw new Error("Failed to query documents");

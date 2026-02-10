@@ -1,5 +1,5 @@
 // tests/test-embedding.js
-const embeddingService = require('../src/services/embedding.service');
+import embeddingService from "../services/embedding.service.js";
 
 async function test() {
   console.log('Testing single embedding...');

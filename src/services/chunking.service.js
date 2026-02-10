@@ -4,13 +4,13 @@ class ChunkingServices {
     const cleanText = text.replace(/\s+/g, " ").trim();
 
     if (cleanText.length <= chunksize) {
-      return cleanText;
+      return [cleanText];
     }
 
     const chunks = [];
     let startIndex = 0;
 
-    while (startIndex < cleanText.lenght) {
+    while (startIndex < cleanText.length) {
       // calculate end index of this chunk
       let endIndex = startIndex + chunksize;
 
@@ -39,7 +39,7 @@ class ChunkingServices {
       }
 
       //   Extract chunk
-      const chunk = cleanText.subString(startIndex, endIndex).trim();
+      const chunk = cleanText.substring(startIndex, endIndex).trim();
       if (chunk.length > 0) {
         chunks.push(chunk);
       }

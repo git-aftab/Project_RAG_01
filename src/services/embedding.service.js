@@ -1,8 +1,11 @@
+// const OpenAI = require('openai');
 import { OpenAI } from "openai";
+// const { pipeline } = require('@xenova/transformers');
 import { pipeline } from "@xenova/transformers";
+// require('dotenv').config();
 import "dotenv/config";
 
-// Client for OpenRouter (chat completions - FREE)
+// ✅ OpenAI SDK pointing to OpenRouter
 const openrouterClient = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
@@ -13,9 +16,6 @@ class EmbeddingService {
     this.embedder = null;
   }
 
-  /**
-   * Initialize the local embedding model (lazy loading)
-   */
   async initEmbedder() {
     if (!this.embedder) {
       console.log("Loading local embedding model (first time only)...");
@@ -28,9 +28,6 @@ class EmbeddingService {
     return this.embedder;
   }
 
-  /**
-   * Generate embedding for single text - FREE & LOCAL
-   */
   async generateEmbedding(text) {
     try {
       const embedder = await this.initEmbedder();
@@ -40,25 +37,30 @@ class EmbeddingService {
         normalize: true,
       });
 
-      // Convert to array and return
-      return Array.from(output.data);
+      const embedding = Array.from(output.data);
+
+      if (embedding.length !== 384) {
+        throw new Error(`Expected 384 dimensions, got ${embedding.length}`);
+      }
+
+      return embedding;
     } catch (error) {
       console.error("Error generating embedding:", error);
       throw new Error("Failed to generate embedding");
     }
   }
 
-  //Generate embeddings for multiple texts - FREE & LOCAL
-
   async generateEmbeddingsForMultiText(texts) {
     try {
       const embeddings = [];
 
-      for (const text of texts) {
-        const embedding = await this.generateEmbedding(text);
+      for (let i = 0; i < texts.length; i++) {
+        console.log(`Generating embedding ${i + 1}/${texts.length}...`);
+        const embedding = await this.generateEmbedding(texts[i]);
         embeddings.push(embedding);
       }
 
+      console.log(`✓ Generated ${embeddings.length} embeddings`);
       return embeddings;
     } catch (error) {
       console.error("Error generating embeddings:", error);
@@ -66,22 +68,19 @@ class EmbeddingService {
     }
   }
 
-  /**
-   * Generate chat completion - FREE via OpenRouter
-   */
   async generateCompletion(messages) {
     try {
+      // ✅ OpenAI SDK syntax - works with OpenRouter
       const response = await openrouterClient.chat.completions.create({
-        model: "openai/gpt-oss-120b:free",
+        model: "meta-llama/llama-3.3-70b-instruct:free",
         messages: messages,
         temperature: 0.7,
         max_tokens: 500,
       });
 
-      console.log(response)
       return response.choices[0].message.content;
     } catch (error) {
-      console.error("Error generating completion:", error);
+      console.error("Error generating completion:", error.message);
       throw new Error("Failed to generate completion");
     }
   }

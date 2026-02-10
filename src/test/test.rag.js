@@ -1,20 +1,26 @@
 // tests/test-rag.js
-const ragService = require('../src/services/rag.service');
+import ragService from "../services/rag.service.js"
 
+// test.rag.js
 async function test() {
   console.log('Testing document upload...');
   
   const result = await ragService.uploadDocument(
     'JavaScript Basics',
-    'JavaScript is a programming language. Variables can be declared with let, const, or var. Functions are first-class citizens.'
+    'JavaScript is a programming language. It was created by Brendan Eich. Variables can be declared using let, const, or var.'
   );
   
   console.log('Document uploaded:', result);
   
-  console.log('\nTesting query...');
-  const answer = await ragService.query('How do you declare variables?');
-  console.log('Answer:', answer.answer);
-  console.log('Sources found:', answer.sources.length);
+  console.log('\nTesting query with direct match...');
+  const answer1 = await ragService.query('What is JavaScript?', 5, 0.3);
+  console.log('Answer:', answer1.answer);
+  console.log('Sources:', answer1.sources.length);
+  
+  console.log('\nTesting query with semantic match...');
+  const answer2 = await ragService.query('How do you make variables?', 5, 0.3);
+  console.log('Answer:', answer2.answer);
+  console.log('Sources:', answer2.sources.length);
 }
 
-test();
+test()
