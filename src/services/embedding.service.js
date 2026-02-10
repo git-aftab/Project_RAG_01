@@ -1,11 +1,8 @@
-// const OpenAI = require('openai');
 import { OpenAI } from "openai";
-// const { pipeline } = require('@xenova/transformers');
 import { pipeline } from "@xenova/transformers";
-// require('dotenv').config();
 import "dotenv/config";
 
-// ✅ OpenAI SDK pointing to OpenRouter
+// OpenAI SDK pointing to OpenRouter
 const openrouterClient = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
@@ -70,7 +67,6 @@ class EmbeddingService {
 
   async generateCompletion(messages) {
     try {
-      // ✅ OpenAI SDK syntax - works with OpenRouter
       const response = await openrouterClient.chat.completions.create({
         model: "meta-llama/llama-3.3-70b-instruct:free",
         messages: messages,

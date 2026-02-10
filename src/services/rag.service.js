@@ -21,12 +21,11 @@ class RAGServices {
       const embeddings =
         await embeddingService.generateEmbeddingsForMultiText(chunks);
 
-      // 🔍 DEBUG: Check embedding format
-      console.log("Number of embeddings:", embeddings.length);
-      console.log("First embedding type:", typeof embeddings[0]);
-      console.log("First embedding is array?", Array.isArray(embeddings[0]));
-      console.log("First embedding length:", embeddings[0]?.length);
-      console.log("First 5 values:", embeddings[0]?.slice(0, 5));
+      // console.log("Number of embeddings:", embeddings.length);
+      // console.log("First embedding type:", typeof embeddings[0]);
+      // console.log("First embedding is array?", Array.isArray(embeddings[0]));
+      // console.log("First embedding length:", embeddings[0]?.length);
+      // console.log("First 5 values:", embeddings[0]?.slice(0, 5));
 
       // const prepare chunk records for alll chunks
       const chunkRecords = chunks.map((chunk, index) => ({
@@ -36,17 +35,17 @@ class RAGServices {
         chunk_index: index,
       }));
 
-      console.log("\n=== DEBUG CHUNK RECORDS ===");
-      console.log("Number of chunk records:", chunkRecords.length);
-      chunkRecords.forEach((record, i) => {
-        console.log(`\nChunk ${i}:`);
-        console.log("  document_id:", record.document_id);
-        console.log("  content length:", record.content.length);
-        console.log("  embedding is array?", Array.isArray(record.embedding));
-        console.log("  embedding length:", record.embedding?.length);
-        console.log("  embedding sample:", record.embedding?.slice(0, 3));
-      });
-      console.log("===========================\n");
+      // console.log("\n=== DEBUG CHUNK RECORDS ===");
+      // console.log("Number of chunk records:", chunkRecords.length);
+      // chunkRecords.forEach((record, i) => {
+      //   console.log(`\nChunk ${i}:`);
+      //   console.log("  document_id:", record.document_id);
+      //   console.log("  content length:", record.content.length);
+      //   console.log("  embedding is array?", Array.isArray(record.embedding));
+      //   console.log("  embedding length:", record.embedding?.length);
+      //   console.log("  embedding sample:", record.embedding?.slice(0, 3));
+      // });
+      // console.log("===========================\n");
 
       const { error: chunksError } = await supabase
         .from("document_chunks")
@@ -130,7 +129,6 @@ class RAGServices {
       console.log(JSON.stringify(messages, null, 2));
       console.log("===========================\n");
 
-      // const answer = await embeddingService.generateCompletion(messages);
 
       const answer = await embeddingService.generateCompletion([
         {
@@ -145,22 +143,6 @@ Answer concisely:`,
         },
       ]);
 
-      // generate answer using llm
-      // const answer = await embeddingService.generateCompletion([
-      //   {
-      //     role: "system",
-      //     content:
-      //       "You are a helpful assistant that answers questions based on the provided context from the user's personal documents.",
-      //   },
-      //   { role: "user", content: prompt },
-      // ]);
-
-      // const sources = matches.map((match) => ({
-      //   documentId: match.document_id,
-      //   content: match.content,
-      //   similarity: match.similarity,
-      // }));
-
       return {
         answer,
         sources: matches.map((match) => ({
@@ -169,11 +151,6 @@ Answer concisely:`,
           similarity: match.similarity,
         })),
       };
-
-      // return {
-      //   answer,
-      //   sources,
-      // };
     } catch (error) {
       console.error("Error querying documents:", error);
       throw new Error("Failed to query documents");
