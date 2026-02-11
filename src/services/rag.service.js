@@ -192,10 +192,11 @@ class RAGServices {
       throw new Error("Failed to delete document");
     }
   }
+
   async getDocs(documentId) {
     try {
       const {
-        data: doucment,
+        data: document,
         error,
         docError,
       } = await supabase
