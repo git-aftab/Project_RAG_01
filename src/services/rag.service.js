@@ -129,17 +129,12 @@ class RAGServices {
       console.log(JSON.stringify(messages, null, 2));
       console.log("===========================\n");
 
-
       const answer = await embeddingService.generateCompletion([
         {
           role: "user",
-          content: `You are a helpful assistant. Answer based ONLY on this context:
-
-${context}
-
-Question: ${question}
-
-Answer concisely:`,
+          content: `You are a helpful assistant. Answer based ONLY on this context:${context}
+          Question: ${question}
+          Answer concisely:`,
         },
       ]);
 
