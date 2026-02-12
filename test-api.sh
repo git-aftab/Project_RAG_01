@@ -22,8 +22,8 @@ echo -e "${YELLOW}2. Uploading Sample Document...${NC}"
 UPLOAD_RESPONSE=$(curl -s -X POST "${API_URL}/documents/upload" \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "JavaScript Guide",
-    "content": "JavaScript is a versatile programming language. It was created in 1995 by Brendan Eich. JavaScript runs in web browsers and on servers using Node.js. Variables can be declared using let, const, or var keywords. The let keyword creates block-scoped variables. The const keyword creates constants that cannot be reassigned. Functions in JavaScript are first-class citizens, meaning they can be assigned to variables, passed as arguments, and returned from other functions. Arrow functions provide a concise syntax for writing function expressions. Promises are used for asynchronous programming in JavaScript. The async and await keywords make it easier to work with promises."
+    "title": "AgriSahy",
+    "content": "AgriSahay is a farmer centric smart advisory application designed for small and medium farmers in Tamil Nadu who grow crops like rice, sugarcane, groundnut and cotton. The application provides simple and actionable guidance to farmers with limited technical knowledge. It offers seasonal crop advisory, pest and disease identification support, fertilizer recommendations, information about government schemes, weather based alerts and local market price updates. For example, during the Kuruvai season from June to September in Tamil Nadu, recommended rice varieties include ADT-43 and CO-51. The suggested seed rate is 30 to 35 kilograms per acre. Fertilizer recommendation per acre includes 110 kilograms of urea, 50 kilograms of DAP and 18 kilograms of potash. One of the major pests affecting rice is stem borer and it can be controlled using Chlorantraniliprole 0.4G at 4 kilograms per acre. In groundnut crops, the seed rate is 50 to 60 kilograms per acre and leaf spot disease can be treated using Mancozeb at 2 grams per liter of water. For rice crops affected by brown plant hopper, symptoms include yellowing leaves and hopper burn patches and it can be treated by spraying Imidacloprid at 0.5 milliliters per liter while avoiding excessive nitrogen fertilizer. Under the Pradhan Mantri Fasal Bima Yojana crop insurance scheme, the premium is 2 percent for Kharif crops and 1.5 percent for Rabi crops. In Chennai market, the price of paddy is 2200 rupees per quintal and groundnut is 6000 rupees per quintal."
   }')
 
 echo "$UPLOAD_RESPONSE" | jq '.'
@@ -36,20 +36,47 @@ curl -s "${API_URL}/documents" | jq '.'
 echo -e "\n"
 
 # Test 4: Query Document
-echo -e "${YELLOW}4. Querying: 'How do you declare variables in JavaScript?'${NC}"
+echo -e "${YELLOW}4. Querying: 'What is the seed rate for rice in Kuruvai season?'${NC}"
 curl -s -X POST "${API_URL}/query" \
   -H "Content-Type: application/json" \
   -d '{
-    "question": "How do you declare variables in JavaScript?"
+    "question": "What is the seed rate for rice in Kuruvai season??"
   }' | jq '.'
 echo -e "\n"
 
 # Test 5: Query Document (another question)
-echo -e "${YELLOW}5. Querying: 'What are arrow functions?'${NC}"
+echo -e "${YELLOW}5. Querying: 'Which pesticide is recommended for stem borer?'${NC}"
 curl -s -X POST "${API_URL}/query" \
   -H "Content-Type: application/json" \
   -d '{
-    "question": "What are arrow functions in JavaScript?"
+    "question": "Which pesticide is recommended for stem borer?"
+  }' | jq '.'
+echo -e "\n"
+
+# Q3
+echo -e "${YELLOW}5. Querying: 'What is the price of paddy in Chennai market?'${NC}"
+curl -s -X POST "${API_URL}/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is the price of paddy in Chennai market?"
+  }' | jq '.'
+echo -e "\n"
+
+# Q4
+echo -e "${YELLOW}5. Querying: 'What is the seed rate for groundnut?'${NC}"
+curl -s -X POST "${API_URL}/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is the seed rate for groundnut?"
+  }' | jq '.'
+echo -e "\n"
+
+# Q5
+echo -e "${YELLOW}5. Querying: 'What is the premium for Rabi crops under PMFBY?'${NC}"
+curl -s -X POST "${API_URL}/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is the premium for Rabi crops under PMFBY?"
   }' | jq '.'
 echo -e "\n"
 
